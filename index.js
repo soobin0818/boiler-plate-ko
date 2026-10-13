@@ -1,13 +1,14 @@
 const express = require('express');
-const app = express()
-const port = 5000
-
+const app = express();
+const port = 5000;
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const {auth} = require("./server/middleware/auth");
+const {User} = require("./server/models/User");
 const cookieParser = require('cookie-parser');
-const config = require('./config/key');
 
-const {auth} = require("./middleware/auth");
-const {User} = require("./models/User");
+const config = require('./server/config/key');
+
 
 // application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({extended: true}));
@@ -16,7 +17,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-const mongoose = require('mongoose');
+
 mongoose.connect(config.mongoURI).then(() => console.log('MonogoDB Connected...'))
 .catch(err => console.log(err))
 
@@ -24,6 +25,10 @@ mongoose.connect(config.mongoURI).then(() => console.log('MonogoDB Connected...'
 
 app.get('/', (req, res) => {
   res.send('Hello World! ^_2^')
+});
+
+app.get('/api/hello', (req, res) => {
+  res.send('hello+_+')
 });
 
 app.post('/api/users/register', async (req, res) => {
