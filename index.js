@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const config = require('./config/key');
 
+const {auth} = require("./middleware/auth");
 const {User} = require("./models/User");
 
 // application/x-www-form-urlencoded
@@ -137,6 +138,53 @@ app.post('/api/users/login', async (req, res) => {
   */
 });
 
+
+app.get('/api/users/auth', auth , (req, res) => {
+  res.status(200).json({
+    _id: req.user._id,
+    isAdmin: req.user.role === 0 ? false : true,
+    isAuth: true,
+    email: req.user.email,
+    name: req.user.name,
+    lastname: req.user.lastname,
+    role: req.user.role,
+    image: req.user.image
+  });
+});
+
+app.get('/api/users/logout', auth, async (req, res) => {
+  try {
+    await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { token: "" }
+    );
+
+    return res.status(200).send({
+      success: true
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      err
+    });
+  }
+});
+/*
+app.get('/api/users/logout', auth, (req, res) => {
+  User.findOneAndUpdate({ _id: req.user._id},
+    { token: ""}, 
+    (err, user) => {
+      if(err){
+        return res.json({ success: false, err});
+      } else {
+        return res.status(200).send({
+          success: true
+        });
+      }
+    }
+  )
+});
+*/
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

@@ -102,6 +102,53 @@ userSchema.methods.generateToken = async function(cb) {
     */
 }
 
+userSchema.statics.findByToken = function(token, cb) {
+    const user = this;
+
+    // 토큰이 없는 경우
+    if (!token) {
+        return cb(null, null);
+    }
+
+    // 토큰 검증
+    jwt.verify(token, 'secretToken', async function(err, decoded) {
+        if (err) {
+            return cb(null, null);
+        }
+
+        try {
+            // Mongoose에서는 await로 조회
+            const foundUser = await user.findOne({
+                _id: decoded,
+                token: token
+            });
+
+            return cb(null, foundUser);
+        } catch (err) {
+            return cb(err);
+        }
+    });
+};
+/*
+userSchema.statics.findByToken = function(token, cb) {
+    var user = this;
+
+    // 토큰을 decode한다
+    jwt.verify(token, 'secretToken', function(err, decoded){
+        // 유저 아이디를 이용해서 유저를 찾은 다음에
+        // 클라이언트에서 가져온 token과 db에 보관된 토큰이 일치하는지 확인
+
+        user.findOne({"_id": decoded, "token": token}, function(err, user){
+            if(err) {
+                return cb(err);
+            } else {
+                cb(null, user);
+            }
+        });
+    });
+}
+*/
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = {User}
